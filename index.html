@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>זימון פגישות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --bg: #f4f2ee;
+    --card: #ffffff;
+    --text: #1f2328;
+    --muted: #6b6f76;
+    --line: #dedad3;
+    --accent: #1f5f8b;
+    --accent-text: #ffffff;
+    --wa: #1c8f4e;
+    --bubble: #e7f6dc;
+    --ok: #2f7d4f;
+    --err: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15181c;
+      --card: #1f242a;
+      --text: #eceef1;
+      --muted: #a1a7b0;
+      --line: #343b44;
+      --accent: #6fb1e0;
+      --accent-text: #15181c;
+      --wa: #3ccf7d;
+      --bubble: #1f3a2a;
+      --ok: #6fcf97;
+      --err: #f2867d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Rubik", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+  header h1 { margin: 0 0 4px; font-size: 1.8rem; }
+  header p { margin: 0 0 24px; color: var(--muted); }
+  form, .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px 20px; margin-bottom: 20px; }
+  h2 { font-size: 1.1rem; margin: 0 0 12px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .full { grid-column: 1 / -1; }
+  @media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
+  label { display: block; font-size: .9rem; margin-bottom: 4px; }
+  .req::after { content: " *"; color: var(--accent); }
+  input, textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  input[type="tel"] { direction: ltr; text-align: right; }
+  textarea { min-height: 70px; resize: vertical; }
+  .preview {
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    background: var(--bubble);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: .95rem;
+    margin-top: 16px;
+  }
+  .preview-label { margin-top: 20px; font-size: .9rem; color: var(--muted); }
+  button {
+    font: inherit;
+    font-weight: 700;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .send {
+    width: 100%;
+    margin-top: 16px;
+    font-size: 1.05rem;
+    padding: 12px;
+    background: var(--wa);
+    color: #ffffff;
+  }
+  .msg { margin-top: 12px; min-height: 1.5em; color: var(--err); }
+  .msg.ok { color: var(--ok); }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line); }
+  li:first-child { border-top: 0; }
+  li .who { font-weight: 500; }
+  li .when { color: var(--muted); font-size: .9rem; }
+  li .when bdi { white-space: nowrap; }
+  li .actions { display: flex; gap: 6px; flex-shrink: 0; }
+  li button { padding: 6px 10px; font-size: .85rem; background: var(--bg); color: var(--text); border: 1px solid var(--line); }
+  .empty { color: var(--muted); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="title">זימון פגישה</h1>
+    <p id="subtitle"></p>
+  </header>
+
+  <form id="form" novalidate>
+    <h2>פרטי הפגישה</h2>
+    <div class="grid">
+      <div>
+        <label for="guest_name" class="req">שם המוזמן</label>
+        <input id="guest_name" name="guest_name" required autocomplete="off">
+      </div>
+      <div>
+        <label for="guest_phone" class="req">טלפון (וואטסאפ)</label>
+        <input id="guest_phone" name="guest_phone" type="tel" required inputmode="tel" placeholder="050-1234567">
+      </div>
+      <div class="full">
+        <label for="host" class="req">הפגישה עם</label>
+        <input id="host" name="host" list="hosts" required autocomplete="off">
+        <datalist id="hosts"></datalist>
+      </div>
+      <div class="full">
+        <label for="date" class="req">תאריך</label>
+        <input id="date" name="date" type="date" required>
+      </div>
+      <div>
+        <label for="start" class="req">שעת התחלה</label>
+        <input id="start" name="start" type="time" required step="300">
+      </div>
+      <div>
+        <label for="end" class="req">שעת סיום</label>
+        <input id="end" name="end" type="time" required step="300">
+      </div>
+      <div class="full">
+        <label for="notes">הערה נוספת למוזמן (לא חובה)</label>
+        <textarea id="notes" name="notes" maxlength="300"></textarea>
+      </div>
+    </div>
+
+    <div class="preview-label">כך תיראה ההודעה:</div>
+    <div class="preview" id="preview"></div>
+
+    <button type="submit" class="send">שליחה בוואטסאפ</button>
+    <div class="msg" id="msg" role="alert"></div>
+  </form>
+
+  <section class="card">
+    <h2>פגישות קרובות</h2>
+    <ul id="list"></ul>
+    <p class="empty" id="empty">אין פגישות קרובות שנשמרו בדפדפן הזה.</p>
+  </section>
+</main>
+
+<script>
+  // ===== הגדרות - לערוך כאן =====
+  const CONFIG = {
+    company: 'מוטי גנץ תכשיטים בע"מ',
+    address: "ז'בוטינסקי 3, רמת גן",
+    building: "בניין יהלום, קומה ג' (ביניים)",
+    parking: 'חניון ציבורי "סנטרל פארק", רחוב תובל 21, רמת גן',
+    parkingWaze: 'https://waze.com/ul?q=Tuval%2021%20Ramat%20Gan&navigate=yes',
+    // שמות שיופיעו כהצעה בשדה "הפגישה עם" (אפשר גם להקליד שם אחר)
+    hosts: ['מוטי גנץ'],
+    // משך ברירת מחדל לפגישה, בדקות (שעת הסיום מתמלאת אוטומטית)
+    defaultMinutes: 60,
+    // לא חובה: כתובת Apps Script לשמירת כל זימון בגוגל שיטס. להשאיר ריק אם לא צריך.
+    scriptUrl: '',
+  };
+  // ===============================
+
+  const $ = (id) => document.getElementById(id);
+  const form = $('form'), msg = $('msg');
+  const STORE_KEY = 'meetings_v1';
+
+  $('subtitle').textContent = CONFIG.company + ' · ' + CONFIG.address;
+  for (const h of CONFIG.hosts) $('hosts').append(new Option(h));
+  if (CONFIG.hosts.length === 1) $('host').value = CONFIG.hosts[0];
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const today = new Date();
+  $('date').min = today.getFullYear() + '-' + pad(today.getMonth() + 1) + '-' + pad(today.getDate());
+
+  // Israeli local numbers (050-1234567) become 972501234567; numbers with + keep their country code.
+  function waNumber(raw) {
+    const s = String(raw).trim();
+    const digits = s.replace(/\D/g, '');
+    if (s.startsWith('+') || digits.startsWith('972')) return digits.length >= 11 ? digits : '';
+    if (digits.startsWith('0') && digits.length === 10) return '972' + digits.slice(1);
+    return '';
+  }
+
+  function hebrewDate(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    const day = dt.toLocaleDateString('he-IL', { weekday: 'long' });
+    return day + ', ' + d + '.' + m + '.' + y;
+  }
+
+  function buildMessage(m) {
+    const lines = [
+      'שלום ' + (m.guest_name || '___') + ',',
+      'נקבעה לך פגישה במשרדי ' + CONFIG.company + '.',
+      '',
+      '📅 תאריך: ' + (m.date ? hebrewDate(m.date) : '___'),
+      '🕐 שעה: ' + (m.start || '__:__') + ' עד ' + (m.end || '__:__'),
+      '👤 הפגישה עם: ' + (m.host || '___'),
+      '',
+      '📍 כתובת: ' + CONFIG.address + ', ' + CONFIG.building,
+      '',
+      '⚠️ חשוב לפני ההגעה:',
+      '• יש להביא תעודה מזהה פיזית: רישיון נהיגה / תעודת זהות / דרכון (צילום בטלפון לא יתקבל)',
+      '• אין להגיע עם נשק אישי',
+      '• אם הגעת אלינו בעבר, אנא שלח/י בתשובה להודעה זו את מספר תעודת הזהות שלך ונעשה לך זימון',
+      '',
+      '🅿️ חניה: ' + CONFIG.parking,
+      'ניווט לחניון: ' + CONFIG.parkingWaze,
+    ];
+    if (m.notes) lines.push('', '📝 ' + m.notes);
+    lines.push('', 'נתראה!', CONFIG.company);
+    return lines.join('\n');
+  }
+
+  const read = () => Object.fromEntries(new FormData(form));
+
+  function render() { $('preview').textContent = buildMessage(read()); }
+  form.addEventListener('input', render);
+
+  // Fill the end time from the start time until the user sets it by hand.
+  let endTouched = false;
+  $('end').addEventListener('input', () => { endTouched = true; });
+  $('start').addEventListener('input', () => {
+    if (endTouched || !$('start').value) return;
+    const [h, mi] = $('start').value.split(':').map(Number);
+    const total = (h * 60 + mi + CONFIG.defaultMinutes) % (24 * 60);
+    $('end').value = pad(Math.floor(total / 60)) + ':' + pad(total % 60);
+    render();
+  });
+
+  function loadAll() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveAll(items) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(items)); } catch (e) { /* storage unavailable */ }
+  }
+
+  function openWhatsApp(m) {
+    const url = 'https://wa.me/' + waNumber(m.guest_phone) + '?text=' + encodeURIComponent(buildMessage(m));
+    window.open(url, '_blank', 'noopener');
+  }
+
+  function showList() {
+    const now = new Date();
+    const todayIso = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+    const items = loadAll()
+      .filter((m) => m.date >= todayIso)
+      .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+    saveAll(items);
+
+    const list = $('list');
+    list.replaceChildren();
+    $('empty').hidden = items.length > 0;
+    for (const m of items) {
+      const li = document.createElement('li');
+      const info = document.createElement('div');
+      const who = document.createElement('div');
+      who.className = 'who';
+      who.textContent = m.guest_name + ' · עם ' + m.host;
+      const when = document.createElement('div');
+      when.className = 'when';
+      const phone = document.createElement('bdi');
+      phone.textContent = m.guest_phone;
+      when.append(hebrewDate(m.date) + ' · ' + m.start + ' עד ' + m.end + ' · ', phone);
+      info.append(who, when);
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      const again = document.createElement('button');
+      again.type = 'button';
+      again.textContent = 'שליחה שוב';
+      again.addEventListener('click', () => openWhatsApp(m));
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.textContent = 'מחיקה';
+      del.addEventListener('click', () => {
+        saveAll(loadAll().filter((x) => x.id !== m.id));
+        showList();
+      });
+      actions.append(again, del);
+
+      li.append(info, actions);
+      list.append(li);
+    }
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    msg.textContent = '';
+    msg.className = 'msg';
+
+    const missing = [...form.querySelectorAll('[required]')].find((el) => !el.value.trim());
+    if (missing) {
+      msg.textContent = 'יש למלא את כל שדות החובה.';
+      missing.focus();
+      return;
+    }
+    if (!waNumber($('guest_phone').value)) {
+      msg.textContent = 'מספר הטלפון לא נראה תקין (למשל 050-1234567).';
+      $('guest_phone').focus();
+      return;
+    }
+    if ($('end').value <= $('start').value) {
+      msg.textContent = 'שעת הסיום צריכה להיות אחרי שעת ההתחלה.';
+      $('end').focus();
+      return;
+    }
+
+    const m = read();
+    m.id = Date.now().toString(36);
+
+    // Open WhatsApp first, inside the click, so the browser doesn't block the new tab.
+    openWhatsApp(m);
+
+    saveAll(loadAll().concat(m));
+    showList();
+
+    if (CONFIG.scriptUrl) {
+      // form-urlencoded keeps this a "simple" request, so no CORS preflight
+      fetch(CONFIG.scriptUrl, { method: 'POST', body: new URLSearchParams(m) }).catch(() => {});
+    }
+
+    msg.className = 'msg ok';
+    msg.textContent = 'וואטסאפ נפתח עם ההודעה. נשאר רק ללחוץ "שליחה" שם.';
+    form.reset();
+    endTouched = false;
+    if (CONFIG.hosts.length === 1) $('host').value = CONFIG.hosts[0];
+    render();
+  });
+
+  render();
+  showList();
+</script>
+</body>
+</html>
