@@ -282,14 +282,26 @@
     return ok;
   }
 
-  // whatsapp:// hands the text straight to the app. The https links pass through
-  // WhatsApp's redirect, which re-encodes the text and turns emojis into question marks.
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // Emojis turn into question marks when the text goes through api.whatsapp.com's
+  // redirect or the desktop app's link handler. So a computer opens WhatsApp Web
+  // directly, and a phone hands the text straight to the app with whatsapp://.
   function openWhatsApp(m) {
     const text = buildMessage(m);
     const phone = waNumber(m.guest_phone);
-    // Silent backup in case the app opens without the text.
+    // Silent backup in case WhatsApp opens without the text.
     copyText(text);
     $('fallback').hidden = true;
+
+    if (!isMobile) {
+      // A named window reuses the same WhatsApp Web tab for every invitation.
+      window.open('https://web.whatsapp.com/send?phone=' + phone + '&text=' + encodeURIComponent(text), 'whatsapp_web');
+      msg.className = 'msg ok';
+      msg.textContent = 'WhatsApp Web נפתח עם ההודעה. נשאר רק ללחוץ שליחה.';
+      return;
+    }
+
     msg.className = 'msg ok';
     msg.textContent = 'פותח את וואטסאפ...';
     location.href = 'whatsapp://send?phone=' + phone + '&text=' + encodeURIComponent(text);
