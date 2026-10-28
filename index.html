@@ -210,28 +210,37 @@
       'שלום ' + (m.guest_name || '___') + ',',
       'נקבעה לך פגישה במשרדי ' + CONFIG.company + '.',
       '',
-      '📅 תאריך: ' + (m.date ? hebrewDate(m.date) : '___'),
-      '🕐 שעה: ' + (m.start || '__:__') + ' עד ' + (m.end || '__:__'),
-      '👤 הפגישה עם: ' + (m.host || '___'),
+      '*תאריך:* ' + (m.date ? hebrewDate(m.date) : '___'),
+      '*שעה:* ' + (m.start || '__:__') + ' עד ' + (m.end || '__:__'),
+      '*הפגישה עם:* ' + (m.host || '___'),
       '',
-      '📍 כתובת: ' + CONFIG.address + ', ' + CONFIG.building,
+      '*כתובת:* ' + CONFIG.address + ', ' + CONFIG.building,
       '',
-      '⚠️ חשוב לפני ההגעה:',
-      '• יש להביא תעודה מזהה פיזית: רישיון נהיגה / תעודת זהות / דרכון (צילום בטלפון לא יתקבל)',
-      '• אין להגיע עם נשק אישי',
-      '• אם הגעת אלינו בעבר, אנא שלח/י בתשובה להודעה זו את מספר תעודת הזהות שלך ונעשה לך זימון',
+      '*חשוב לפני ההגעה:*',
+      '- יש להביא תעודה מזהה פיזית: רישיון נהיגה / תעודת זהות / דרכון (צילום בטלפון לא יתקבל)',
+      '- אין להגיע עם נשק אישי',
+      '- אם הגעת אלינו בעבר, אנא שלח/י בתשובה להודעה זו את מספר תעודת הזהות שלך ונעשה לך זימון',
       '',
-      '🅿️ חניה: ' + CONFIG.parking,
+      '*חניה:* ' + CONFIG.parking,
       'ניווט לחניון: ' + CONFIG.parkingWaze,
     ];
-    if (m.notes) lines.push('', '📝 ' + m.notes);
+    if (m.notes) lines.push('', '*הערה:* ' + m.notes);
     lines.push('', 'נתראה!', CONFIG.company);
     return lines.join('\n');
   }
 
   const read = () => Object.fromEntries(new FormData(form));
 
-  function render() { $('preview').textContent = buildMessage(read()); }
+  // Show *bold* the way WhatsApp does.
+  function render() {
+    const parts = buildMessage(read()).split(/\*([^*\n]+)\*/);
+    $('preview').replaceChildren(...parts.map((t, i) => {
+      if (i % 2 === 0) return t;
+      const b = document.createElement('b');
+      b.textContent = t;
+      return b;
+    }));
+  }
   form.addEventListener('input', render);
 
   // Fill the end time from the start time until the user sets it by hand.
