@@ -210,21 +210,21 @@
       'שלום ' + (m.guest_name || '___') + ',',
       'נקבעה לך פגישה במשרדי ' + CONFIG.company + '.',
       '',
-      '*תאריך:* ' + (m.date ? hebrewDate(m.date) : '___'),
-      '*שעה:* ' + (m.start || '__:__') + ' עד ' + (m.end || '__:__'),
-      '*הפגישה עם:* ' + (m.host || '___'),
+      '📅 *תאריך:* ' + (m.date ? hebrewDate(m.date) : '___'),
+      '🕐 *שעה:* ' + (m.start || '__:__') + ' עד ' + (m.end || '__:__'),
+      '👤 *הפגישה עם:* ' + (m.host || '___'),
       '',
-      '*כתובת:* ' + CONFIG.address + ', ' + CONFIG.building,
+      '📍 *כתובת:* ' + CONFIG.address + ', ' + CONFIG.building,
       '',
-      '*חשוב לפני ההגעה:*',
-      '- יש להביא תעודה מזהה פיזית: רישיון נהיגה / תעודת זהות / דרכון (צילום בטלפון לא יתקבל)',
-      '- אין להגיע עם נשק אישי',
-      '- אם הגעת אלינו בעבר, אנא שלח/י בתשובה להודעה זו את מספר תעודת הזהות שלך ונעשה לך זימון',
+      '⚠️ *חשוב לפני ההגעה:*',
+      '• יש להביא תעודה מזהה פיזית: רישיון נהיגה / תעודת זהות / דרכון (צילום בטלפון לא יתקבל)',
+      '• אין להגיע עם נשק אישי',
+      '• אם הגעת אלינו בעבר, אנא שלח/י בתשובה להודעה זו את מספר תעודת הזהות שלך ונעשה לך זימון',
       '',
-      '*חניה:* ' + CONFIG.parking,
-      'ניווט לחניון: ' + CONFIG.parkingWaze,
+      '🅿️ *חניה:* ' + CONFIG.parking,
+      '🚗 ניווט לחניון: ' + CONFIG.parkingWaze,
     ];
-    if (m.notes) lines.push('', '*הערה:* ' + m.notes);
+    if (m.notes) lines.push('', '📝 *הערה:* ' + m.notes);
     lines.push('', 'נתראה!', CONFIG.company);
     return lines.join('\n');
   }
@@ -262,7 +262,8 @@
   }
 
   function openWhatsApp(m) {
-    const url = 'https://wa.me/' + waNumber(m.guest_phone) + '?text=' + encodeURIComponent(buildMessage(m));
+    // Not wa.me: its redirect re-encodes the text and turns emojis into question marks.
+    const url = 'https://api.whatsapp.com/send/?phone=' + waNumber(m.guest_phone) + '&text=' + encodeURIComponent(buildMessage(m));
     window.open(url, '_blank', 'noopener');
   }
 
