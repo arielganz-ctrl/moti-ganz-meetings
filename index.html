@@ -149,8 +149,9 @@
     <div class="preview-label">כך תיראה ההודעה:</div>
     <div class="preview" id="preview"></div>
 
-    <button type="submit" class="send">העתקת ההודעה ופתיחת וואטסאפ</button>
+    <button type="submit" class="send">שליחה בוואטסאפ</button>
     <div class="msg" id="msg" role="alert"></div>
+    <button type="button" class="send" id="fallback" hidden>פתיחה בדרך החלופית</button>
   </form>
 
   <section class="card">
@@ -281,20 +282,33 @@
     return ok;
   }
 
-  // The message is copied and pasted rather than sent in the link: WhatsApp's link
-  // redirects re-encode the text and turn emojis into question marks.
+  // whatsapp:// hands the text straight to the app. The https links pass through
+  // WhatsApp's redirect, which re-encodes the text and turns emojis into question marks.
   function openWhatsApp(m) {
-    const copied = copyText(buildMessage(m));
-    window.open('https://api.whatsapp.com/send/?phone=' + waNumber(m.guest_phone), '_blank', 'noopener');
-    copied.then((ok) => {
-      // Leave the full message on screen so it can be copied by hand.
-      if (!ok) $('preview').textContent = buildMessage(m);
-      msg.className = ok ? 'msg ok' : 'msg';
-      msg.textContent = ok
-        ? 'ההודעה הועתקה. בוואטסאפ: לחיצה ארוכה בתיבת ההודעה ← הדבקה ← שליחה.'
-        : 'לא הצלחנו להעתיק אוטומטית. סמנו את ההודעה בתצוגה המקדימה למעלה והעתיקו ידנית.';
-    });
+    const text = buildMessage(m);
+    const phone = waNumber(m.guest_phone);
+    // Silent backup in case the app opens without the text.
+    copyText(text);
+    $('fallback').hidden = true;
+    msg.className = 'msg ok';
+    msg.textContent = 'פותח את וואטסאפ...';
+    location.href = 'whatsapp://send?phone=' + phone + '&text=' + encodeURIComponent(text);
+
+    // If the page is still in front after a moment, the app didn't open.
+    setTimeout(() => {
+      if (document.hidden) { msg.textContent = ''; return; }
+      msg.className = 'msg';
+      msg.textContent = 'אם וואטסאפ לא נפתח:';
+      const btn = $('fallback');
+      btn.hidden = false;
+      btn.onclick = () => {
+        window.open('https://api.whatsapp.com/send/?phone=' + phone + '&text=' + encodeURIComponent(text), '_blank', 'noopener');
+        btn.hidden = true;
+        msg.textContent = '';
+      };
+    }, 2000);
   }
+
 
   function showList() {
     const now = new Date();
